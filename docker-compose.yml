@@ -1,0 +1,35 @@
+version: '2'
+
+services:
+  zookeeper:
+    image: dipakpravin87/zookeeper:v3.4.9
+    ports:
+      - "2181:2181"
+  kafka:
+    image: dipakpravin87/kafka:latest
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ADVERTISED_PORT: "9092"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  transaction-producer:
+    image: dipakpravin87/transaction-producer-app:latest
+    ports:
+      - "8080:8080"
+    tty: true
+    depends_on:
+      - kafka
+
+  transaction-consumer:
+    image: dipakpravin87/transaction-consumer-app:latest
+    ports:
+      - "8081:8081"
+    tty: true
+    depends_on:
+      - kafka
