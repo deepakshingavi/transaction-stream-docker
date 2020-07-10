@@ -1,11 +1,17 @@
-version: '2'
-
+version: '3.5'
+networks:
+  produce-consume:
+    name: produce-consume
 services:
   zookeeper:
+    container_name: zookeeper_1
     image: dipakpravin87/zookeeper:v3.4.9
     ports:
       - "2181:2181"
+    networks:
+      - produce-consume
   kafka:
+    container_name: kafka_1
     image: dipakpravin87/kafka:latest
     ports:
       - "9092:9092"
@@ -17,19 +23,27 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - produce-consume
 
   transaction-producer:
+    container_name: transaction-producer-1
     image: dipakpravin87/transaction-producer-app:latest
     ports:
       - "8080:8080"
     tty: true
     depends_on:
       - kafka
+    networks:
+      - produce-consume
 
   transaction-consumer:
+    container_name: transaction-consumer-1
     image: dipakpravin87/transaction-consumer-app:latest
     ports:
       - "8081:8081"
     tty: true
     depends_on:
       - kafka
+    networks:
+      - produce-consume
